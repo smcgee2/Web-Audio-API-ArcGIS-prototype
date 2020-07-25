@@ -9,7 +9,7 @@ Showcase it working with a small prototype with 1 or 2 prebaked audio clips.
 Stage 2.
 Automate with another external API to get sound effects.
 
-##Links 
+## Links 
 Web Audio API documentation
 https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
 
