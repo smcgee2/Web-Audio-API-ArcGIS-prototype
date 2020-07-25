@@ -2,10 +2,9 @@ require([
     "esri/Graphic",
     "esri/views/SceneView",
     "esri/WebScene",
-    "esri/symbols/WebStyleSymbol",
+    "esri/symbols/WebStyleSymbol"
 
-    "esri/core/watchUtils"
-], function(Graphic, SceneView, WebScene, WebStyleSymbol, watchUtils) {
+], function(Graphic, SceneView, WebScene, WebStyleSymbol) {
 
     var cameraFOV = 55
 
@@ -50,20 +49,13 @@ require([
 
     // setup listeners
     function setupCameraListeners() {
-        const properties = [
-            "camera.position.z",
-            "camera.tilt",
-            "camera.heading"
-        ];
 
-        for (let i = 0; i < properties.length; i++) {
-            setupPropertiesListener(view, properties[i]);
-        }
+        setupPropertiesListener(view, "camera");
 
-        // when with tilt, z or heading changes, this func gets triggered.
+        // returns full camera object
         function setupPropertiesListener(view, name) {
             view.watch(name, function(value) {
-                console.log(name + "-" + value)
+                console.log(value)
             });
         }
     }
