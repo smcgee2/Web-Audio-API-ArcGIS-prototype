@@ -9,12 +9,12 @@ Showcase it working with a small prototype with 1 or 2 prebaked audio clips.
 Stage 2.
 Automate with another external API to get sound effects.
 
-#Links 
+##Links 
 Web Audio API documentation
 https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
 
-#ArcGIS API for JavaScript (3D)
+ArcGIS API for JavaScript (3D)
 https://developers.arcgis.com/javascript/latest/api-reference/
 
-# Sound API (Stage 2+)
+Sound API (Stage 2+)
 https://freesound.org/help/developers/
