@@ -20,6 +20,8 @@ require([
     const boatEngine = [1493174.243544884, 6893700.514951046];
     const waterA = [1493107.604696026, 6893709.391938755];
     const waterB = [1493920.2807606554, 6893570.898283289];
+    const birdsA = [1493325.5917520842, 6893439.523885197]
+    const birdsB = [1493195.966101118, 6894130.348681002]
 
     var graphicsLayer = new GraphicsLayer();
 
@@ -91,13 +93,14 @@ require([
         // define audio/sound files here.
         var crane = audioUtils.createAudio('audio/crane.wav');
         var water = audioUtils.createAudio('audio/water.wav');
+        var birds = audioUtils.createAudio('audio/birds.wav');
         var boatEngineSound = audioUtils.createAudio('audio/boatEngine.wav');
 
         setupPropertiesListener(view, "camera");
 
         function setupPropertiesListener(view, name) {
             view.watch(name, function(value) {
-                // console.log(value.position.x, value.position.y, value.position.z)
+                //console.log(value.position.x, value.position.y, value.position.z)
 
                 // NOTE, here is where I want to start adding in LEFT and RIGHT/3D sound... for now, manually changing volume based on distance.
                 //sound.orientation(value.position.x, value.position.y, value.position.z)
@@ -112,6 +115,12 @@ require([
 
                 var distanceWaterB = getDistance([value.position.x, value.position.y, value.position.z], waterB)
                 audioUtils.updateSoundVolume(distanceWaterB, 500, water)
+
+                var distanceBirds = getDistance([value.position.x, value.position.y, value.position.z], birdsA)
+                audioUtils.updateSoundVolume(distanceBirds, 500, birds)
+
+                var distanceBirdsB = getDistance([value.position.x, value.position.y, value.position.z], birdsB)
+                audioUtils.updateSoundVolume(distanceWaterB, 500, birds)
 
                 var distanceBoat = getDistance([value.position.x, value.position.y, value.position.z], boatEngine)
                 audioUtils.updateSoundVolume(distanceBoat, 200, boatEngineSound)
