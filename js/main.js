@@ -88,6 +88,7 @@ require([
 
     // setup listeners
     function setupCameraListeners() {
+        // define audio/sound files here.
         var crane = audioUtils.createAudio('audio/crane.wav');
         var water = audioUtils.createAudio('audio/water.wav');
         var boatEngineSound = audioUtils.createAudio('audio/boatEngine.wav');
@@ -102,6 +103,7 @@ require([
                 //sound.orientation(value.position.x, value.position.y, value.position.z)
                 //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
 
+                // get the distnace + update the volume for each sound node
                 var distance = getDistance([value.position.x, value.position.y, value.position.z], craneCoordinates)
                 audioUtils.updateSoundVolume(distance, 1000, crane)
 
@@ -110,7 +112,6 @@ require([
 
                 var distanceWaterB = getDistance([value.position.x, value.position.y, value.position.z], waterB)
                 audioUtils.updateSoundVolume(distanceWaterB, 500, water)
-
 
                 var distanceBoat = getDistance([value.position.x, value.position.y, value.position.z], boatEngine)
                 audioUtils.updateSoundVolume(distanceBoat, 200, boatEngineSound)
