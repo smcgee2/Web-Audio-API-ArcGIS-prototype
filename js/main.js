@@ -1,4 +1,6 @@
 require([
+
+    // esri requires
     "esri/Graphic",
     "esri/layers/GraphicsLayer",
     "esri/views/SceneView",
@@ -6,9 +8,11 @@ require([
     "esri/symbols/WebStyleSymbol",
     "esri/geometry/support/webMercatorUtils",
     "esri/geometry/geometryEngine",
-    "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.js"
 
-], function(Graphic, GraphicsLayer, SceneView, WebScene, WebStyleSymbol, webMercatorUtils, geometryEngine, howler) {
+    // custom module
+    "./js/modules/audioUtils.js"
+
+], function(Graphic, GraphicsLayer, SceneView, WebScene, WebStyleSymbol, webMercatorUtils, geometryEngine, audioUtils) {
 
     var cameraFOV = 55
     const craneCoordinates = [947733.6382228889, 6008332.401697359];
@@ -54,6 +58,7 @@ require([
 
     // setup listeners
     function setupCameraListeners() {
+        var crane = audioUtils.createAudio('audio/crane.wav');
         setupPropertiesListener(view, "camera");
 
         function setupPropertiesListener(view, name) {
@@ -63,17 +68,23 @@ require([
                 // NOTE, here is where I want to start adding in LEFT and RIGHT/3D sound... for now, manually changing volume based on distance.
                 //sound.orientation(value.position.x, value.position.y, value.position.z)
                 //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
-                updateSoundVolume([value.position.x, value.position.y, value.position.z], craneCoordinates)
+
+
+                var distance = getDistance([value.position.x, value.position.y, value.position.z], craneCoordinates)
+                audioUtils.updateSoundVolume(distance, crane)
             });
         }
     }
 
-    function updateSoundVolume(a, b) {
+
+    function getDistance(a, b) {
         graphicsLayer.removeAll();
 
-        var pointA = webMercatorUtils.xyToLngLat(a[0], a[1])
-        var pointB = webMercatorUtils.xyToLngLat(b[0], b[1])
+        // convert from xy to longlay
+        var pointA = webMercatorUtils.xyToLngLat(a[0], a[1]);
+        var pointB = webMercatorUtils.xyToLngLat(b[0], b[1]);
 
+        // create geometry
         var polyline = {
             type: "polyline", // autocasts as new Polyline()
             paths: [
@@ -82,34 +93,16 @@ require([
             ]
         };
 
-        lineSymbol = {
-            type: "simple-line", // autocasts as SimpleLineSymbol()
-            color: [226, 119, 40],
-            width: 4
-        };
-
+        // build graphic
         var polylineGraphic = new Graphic({
             geometry: polyline,
             symbol: null
         });
 
+        // add graphic to layer
         graphicsLayer.add(polylineGraphic);
 
-        var distanceInMeters = geometryEngine.geodesicLength(polylineGraphic.geometry, "meters")
-
-        if (distanceInMeters > 1000) {
-            sound.volume(0)
-        } else {
-            sound.volume((1000 - distanceInMeters) / 1000)
-        }
+        // return the length
+        return geometryEngine.geodesicLength(polylineGraphic.geometry, "meters")
     }
-
-    var sound = new howler.Howl({
-        src: ['audio/crane.wav'],
-        autoplay: true,
-        loop: true,
-        plannerAttr: {
-            panningModel: 'HRTF'
-        }
-    });
 })
