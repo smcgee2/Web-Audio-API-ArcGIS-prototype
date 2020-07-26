@@ -3,6 +3,7 @@ require([
     // esri requires
     "esri/Graphic",
     "esri/layers/GraphicsLayer",
+    "esri/layers/FeatureLayer",
     "esri/views/SceneView",
     "esri/WebScene",
     "esri/symbols/WebStyleSymbol",
@@ -12,25 +13,54 @@ require([
     // custom module
     "./js/modules/audioUtils.js"
 
-], function(Graphic, GraphicsLayer, SceneView, WebScene, WebStyleSymbol, webMercatorUtils, geometryEngine, audioUtils) {
+], function(Graphic, GraphicsLayer, FeatureLayer, SceneView, WebScene, WebStyleSymbol, webMercatorUtils, geometryEngine, audioUtils) {
 
     var cameraFOV = 55
-    const craneCoordinates = [947733.6382228889, 6008332.401697359];
+    const craneCoordinates = [1494250.8687, 6893332.5887];
+    const boatEngine = [1493174.243544884, 6893700.514951046];
+    const waterA = [1493107.604696026, 6893709.391938755];
+    const waterB = [1493920.2807606554, 6893570.898283289];
+
     var graphicsLayer = new GraphicsLayer();
 
     // Adding buildings + initiating view.
     var view = new SceneView({
         map: new WebScene({
             portalItem: {
-                id: "167f8a547ded4171abb2480a30022303"
+                id: "8ede93ea9d8d48bc8cdcbea775936a13"
             }
         }),
-        container: "viewDiv"
+        container: "viewDiv",
+        qualityProfile: "high"
     });
+
+    const waterLayer = new FeatureLayer({
+        url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Water_bodies/FeatureServer",
+        elevationInfo: {
+            mode: "absolute-height",
+            offset: 0
+        },
+        renderer: {
+            type: "simple",
+            symbol: {
+                type: "polygon-3d",
+                symbolLayers: [{
+                    type: "water",
+                    waveDirection: 260,
+                    color: "#25427c",
+                    waveStrength: "moderate",
+                    waterbodySize: "medium"
+                }]
+            }
+        }
+    });
+
+    view.map.add(waterLayer);
 
     // when view is created, then create our crane symbol.
     view.when(function() {
-        createCraneGraphic(craneCoordinates);
+        view.environment.lighting.waterReflectionEnabled = true;
+        createCraneGraphic(craneCoordinates); //manual showcase of webstyle symbol creation with audio
 
         cameraFOV = view.camera.fov // should be 55 - added this incase mobile/rotated device
         setupCameraListeners()
@@ -59,6 +89,9 @@ require([
     // setup listeners
     function setupCameraListeners() {
         var crane = audioUtils.createAudio('audio/crane.wav');
+        var water = audioUtils.createAudio('audio/water.wav');
+        var boatEngineSound = audioUtils.createAudio('audio/boatEngine.wav');
+
         setupPropertiesListener(view, "camera");
 
         function setupPropertiesListener(view, name) {
@@ -69,9 +102,19 @@ require([
                 //sound.orientation(value.position.x, value.position.y, value.position.z)
                 //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
 
-
                 var distance = getDistance([value.position.x, value.position.y, value.position.z], craneCoordinates)
-                audioUtils.updateSoundVolume(distance, crane)
+                audioUtils.updateSoundVolume(distance, 1000, crane)
+
+                var distanceWater = getDistance([value.position.x, value.position.y, value.position.z], waterA)
+                audioUtils.updateSoundVolume(distanceWater, 500, water)
+
+                var distanceWaterB = getDistance([value.position.x, value.position.y, value.position.z], waterB)
+                audioUtils.updateSoundVolume(distanceWaterB, 500, water)
+
+
+                var distanceBoat = getDistance([value.position.x, value.position.y, value.position.z], boatEngine)
+                audioUtils.updateSoundVolume(distanceBoat, 200, boatEngineSound)
+
             });
         }
     }

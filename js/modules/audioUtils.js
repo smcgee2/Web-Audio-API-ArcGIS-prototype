@@ -17,13 +17,14 @@ define([
             });
         }
 
-        function updateSoundVolume(distanceInMeters, sound) {
-            if (distanceInMeters > 1000) {
+        function updateSoundVolume(distanceInMeters, mixDist, sound) {
+            if (distanceInMeters > mixDist) {
                 sound.volume(0)
             } else {
-                sound.volume((1000 - distanceInMeters) / 1000)
+                sound.volume((mixDist - distanceInMeters) / mixDist)
             }
         }
+
         //Stuff to make public
         return {
             createAudio: createAudio,
