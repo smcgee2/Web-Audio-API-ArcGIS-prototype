@@ -20,8 +20,9 @@ require([
     const boatEngine = [1493174.243544884, 6893700.514951046];
     const waterA = [1493107.604696026, 6893709.391938755];
     const waterB = [1493920.2807606554, 6893570.898283289];
-    const birdsA = [1493325.5917520842, 6893439.523885197]
-    const birdsB = [1493195.966101118, 6894130.348681002]
+    const birdsA = [1493325.5917520842, 6893439.523885197];
+    const birdsB = [1493195.966101118, 6894130.348681002];
+    const tramStation = [1492951.6263078996, 6894975.189566879];
 
     var graphicsLayer = new GraphicsLayer();
 
@@ -95,6 +96,7 @@ require([
         var water = audioUtils.createAudio('audio/water.wav');
         var birds = audioUtils.createAudio('audio/birds.wav');
         var boatEngineSound = audioUtils.createAudio('audio/boatEngine.wav');
+        var tramSound = audioUtils.createAudio('audio/tramStation.wav');
 
         setupPropertiesListener(view, "camera");
 
@@ -124,6 +126,9 @@ require([
 
                 var distanceBoat = getDistance([value.position.x, value.position.y, value.position.z], boatEngine)
                 audioUtils.updateSoundVolume(distanceBoat, 200, boatEngineSound)
+
+                var tramStationDistance = getDistance([value.position.x, value.position.y, value.position.z], tramStation)
+                audioUtils.updateSoundVolume(tramStationDistance, 400, tramSound)
 
             });
         }
