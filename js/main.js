@@ -14,7 +14,7 @@ require([
 ], function(Graphic, FeatureLayer, SceneView, WebScene, webMercatorUtils, geometryEngine, audioUtils) {
     let cameraFOV = 55;
 
-    var arrayOfAudioNodes = [{
+    let arrayOfAudioNodes = [{
             coordinate: [1494250.8687, 6893332.5887],
             audio: audioUtils.createAudio('audio/crane.wav'),
             distance: 100
@@ -90,29 +90,20 @@ require([
     view.when(function() {
         view.environment.lighting.waterReflectionEnabled = true;
         cameraFOV = view.camera.fov // should be 55 - added this incase mobile/rotated device
-        setupCameraListeners();
-    });
 
-    // setup listeners
-    function setupCameraListeners() {
         view.watch("camera", function(value) {
-            //console.log(value.position.x, value.position.y, value.position.z)
+            arrayOfAudioNodes.forEach(function(soundNode) {
+                // Distance based volume control
+                // const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], soundNode.coordinate)
+                // const loudNess = soundNode.distance // distance can be heard from object in meters
+                // audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio);
 
-            // NOTE, here is where I want to start adding in LEFT and RIGHT/3D sound... for now, manually changing volume based on distance.
-            //sound.orientation(value.position.x, value.position.y, value.position.z)
-            //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
-
-            for (soundNode = 0; soundNode < arrayOfAudioNodes.length; soundNode++) {
-                const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], arrayOfAudioNodes[soundNode].coordinate)
-                const loudNess = arrayOfAudioNodes[soundNode].distance // distance can be heard from object in meters
-                const audio = arrayOfAudioNodes[soundNode].audio
-                    // audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio);
-                audioUtils.ThreeDAudio(value, arrayOfAudioNodes[soundNode].coordinate, audio)
-            };
-
+                // 3D spatial audio control
+                const audio = soundNode.audio
+                audioUtils.ThreeDAudio(value, soundNode.coordinate, audio)
+            });
         });
-    }
-
+    });
 
     function getDistance(coodinatesA, coordinatesB) {
         // convert from xy to longlay
