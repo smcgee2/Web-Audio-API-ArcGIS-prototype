@@ -2,18 +2,16 @@ require([
 
     // esri requires
     "esri/Graphic",
-    "esri/layers/GraphicsLayer",
     "esri/layers/FeatureLayer",
     "esri/views/SceneView",
     "esri/WebScene",
-    "esri/symbols/WebStyleSymbol",
     "esri/geometry/support/webMercatorUtils",
     "esri/geometry/geometryEngine",
 
     // custom module
     "./js/modules/audioUtils.js"
 
-], function(Graphic, GraphicsLayer, FeatureLayer, SceneView, WebScene, WebStyleSymbol, webMercatorUtils, geometryEngine, audioUtils) {
+], function(Graphic, FeatureLayer, SceneView, WebScene, webMercatorUtils, geometryEngine, audioUtils) {
     let cameraFOV = 55;
 
     var arrayOfAudioNodes = [{
@@ -53,9 +51,6 @@ require([
             distance: 400
         },
     ]
-
-
-    const tempCalculationsGL = new GraphicsLayer();
 
     // Adding buildings + initiating view.
     var view = new SceneView({
@@ -117,12 +112,10 @@ require([
     }
 
 
-    function getDistance(a, b) {
-        tempCalculationsGL.removeAll();
-
+    function getDistance(coodinatesA, coordinatesB) {
         // convert from xy to longlay
-        var pointA = webMercatorUtils.xyToLngLat(a[0], a[1]);
-        var pointB = webMercatorUtils.xyToLngLat(b[0], b[1]);
+        var pointA = webMercatorUtils.xyToLngLat(coodinatesA[0], coodinatesA[1]);
+        var pointB = webMercatorUtils.xyToLngLat(coordinatesB[0], coordinatesB[1]);
 
         // build graphic    
         var polylineGraphic = new Graphic({
@@ -136,8 +129,6 @@ require([
             symbol: null
         });
 
-        // add graphic to layer
-        tempCalculationsGL.add(polylineGraphic);
 
         // return the length
         return Math.round(geometryEngine.geodesicLength(polylineGraphic.geometry, "meters"));
