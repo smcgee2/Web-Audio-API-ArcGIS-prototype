@@ -13,6 +13,9 @@ Automate with another external API to get sound effects.
 Web Audio API documentation
 https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
 
+Howler.js as an easier 3d audio api
+https://github.com/goldfire/howler.js
+
 ArcGIS API for JavaScript (3D)
 https://developers.arcgis.com/javascript/latest/api-reference/
 
