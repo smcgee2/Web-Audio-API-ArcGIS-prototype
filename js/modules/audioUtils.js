@@ -5,6 +5,10 @@ define([
     ],
     function(howler) {
 
+        function ThreeDAudio(cameraPosition, audioNodePosition, sound) {
+            sound.orientation(cameraPosition.position.x, cameraPosition.position.y, 0)
+            sound.pos((audioNodePosition[0] - cameraPosition.position.x) / 10, (audioNodePosition[1] - cameraPosition.position.y) / 10, 0)
+        }
 
         function createAudio(source) {
             return new howler.Howl({
@@ -27,6 +31,7 @@ define([
 
         //Stuff to make public
         return {
+            ThreeDAudio: ThreeDAudio,
             createAudio: createAudio,
             updateSoundVolume: updateSoundVolume
         };

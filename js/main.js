@@ -106,8 +106,10 @@ require([
                 const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], arrayOfAudioNodes[soundNode].coordinate)
                 const loudNess = arrayOfAudioNodes[soundNode].distance // distance can be heard from object in meters
                 const audio = arrayOfAudioNodes[soundNode].audio
-                audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio)
+                    // audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio);
+                audioUtils.ThreeDAudio(value, arrayOfAudioNodes[soundNode].coordinate, audio)
             };
+
         });
     }
 
