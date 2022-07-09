@@ -95,30 +95,25 @@ require([
     view.when(function() {
         view.environment.lighting.waterReflectionEnabled = true;
         cameraFOV = view.camera.fov // should be 55 - added this incase mobile/rotated device
-        setupCameraListeners()
+        setupCameraListeners();
     });
 
     // setup listeners
     function setupCameraListeners() {
+        view.watch("camera", function(value) {
+            //console.log(value.position.x, value.position.y, value.position.z)
 
-        setupPropertiesListener(view, "camera");
+            // NOTE, here is where I want to start adding in LEFT and RIGHT/3D sound... for now, manually changing volume based on distance.
+            //sound.orientation(value.position.x, value.position.y, value.position.z)
+            //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
 
-        function setupPropertiesListener(view, name) {
-            view.watch(name, function(value) {
-                //console.log(value.position.x, value.position.y, value.position.z)
-
-                // NOTE, here is where I want to start adding in LEFT and RIGHT/3D sound... for now, manually changing volume based on distance.
-                //sound.orientation(value.position.x, value.position.y, value.position.z)
-                //sound.pos(craneCoordinates[0], craneCoordinates[1], value.position.z)
-
-                for (soundNode = 0; soundNode < arrayOfAudioNodes.length; soundNode++) {
-                    const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], arrayOfAudioNodes[soundNode].coordinate)
-                    const loudNess = arrayOfAudioNodes[soundNode].distance // distance can be heard from object in meters
-                    const audio = arrayOfAudioNodes[soundNode].audio
-                    audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio)
-                };
-            });
-        }
+            for (soundNode = 0; soundNode < arrayOfAudioNodes.length; soundNode++) {
+                const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], arrayOfAudioNodes[soundNode].coordinate)
+                const loudNess = arrayOfAudioNodes[soundNode].distance // distance can be heard from object in meters
+                const audio = arrayOfAudioNodes[soundNode].audio
+                audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio)
+            };
+        });
     }
 
 
