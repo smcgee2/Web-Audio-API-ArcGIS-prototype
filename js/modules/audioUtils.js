@@ -41,11 +41,11 @@ define([
             });
         }
 
-        function updateSoundVolume(distanceInMeters, mixDist, sound) {
-            if (distanceInMeters > mixDist) {
+        function updateSoundVolume(distanceInMeters, maxDist, sound) {
+            if (distanceInMeters > maxDist) {
                 sound.volume(0);
             } else {
-                sound.volume((mixDist - distanceInMeters) / mixDist);
+                sound.volume((maxDist - distanceInMeters) / maxDist);
             }
         }
 
