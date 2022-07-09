@@ -1,5 +1,4 @@
 require([
-
     // esri requires
     "esri/Graphic",
     "esri/layers/FeatureLayer",
@@ -12,8 +11,9 @@ require([
     "./js/modules/audioUtils.js"
 
 ], function(Graphic, FeatureLayer, SceneView, WebScene, webMercatorUtils, geometryEngine, audioUtils) {
-    let cameraFOV = 55;
 
+    // Example format for audio code
+    // TODO: This should be a point FeatureService!
     let arrayOfAudioNodes = [{
             coordinate: [1494250.8687, 6893332.5887],
             audio: audioUtils.createAudio('audio/crane.wav'),
@@ -53,7 +53,7 @@ require([
     ]
 
     // Adding buildings + initiating view.
-    var view = new SceneView({
+    let view = new SceneView({
         map: new WebScene({
             portalItem: {
                 id: "8ede93ea9d8d48bc8cdcbea775936a13"
@@ -63,6 +63,7 @@ require([
         qualityProfile: "high"
     });
 
+    // Adding realistic water
     const waterLayer = new FeatureLayer({
         url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Water_bodies/FeatureServer",
         elevationInfo: {
@@ -84,34 +85,38 @@ require([
         }
     });
 
+    // Add water layer to the map
     view.map.add(waterLayer);
 
-    // when view is created, then create our crane symbol.
+    // when view is created
     view.when(function() {
         view.environment.lighting.waterReflectionEnabled = true;
         cameraFOV = view.camera.fov // should be 55 - added this incase mobile/rotated device
 
         view.watch("camera", function(value) {
             arrayOfAudioNodes.forEach(function(soundNode) {
-                // Distance based volume control
                 // const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], soundNode.coordinate)
                 // const loudNess = soundNode.distance // distance can be heard from object in meters
-                // audioUtils.updateSoundVolume(distanceFromCamera, loudNess, audio);
+
+                // Distance based volume control
+                //audioUtils.updateSoundVolume(distanceFromCamera, loudNess, soundNode.audio);
 
                 // 3D spatial audio control
-                const audio = soundNode.audio
-                audioUtils.ThreeDAudio(value, soundNode.coordinate, audio)
+                audioUtils.ThreeDAudio(value, soundNode.coordinate, soundNode.audio)
             });
         });
     });
 
+    /**
+     * @param {array} coodinatesA Array of coordinates to start input distance form. This the camera in this case.
+     * @param {array} coordinatesB Array of coordinates to end the measurement from. In this case it's the coordinate of the audio node.
+     * @returns rounded distance between both coordinates in meters.
+     */
     function getDistance(coodinatesA, coordinatesB) {
-        // convert from xy to longlay
-        var pointA = webMercatorUtils.xyToLngLat(coodinatesA[0], coodinatesA[1]);
-        var pointB = webMercatorUtils.xyToLngLat(coordinatesB[0], coordinatesB[1]);
+        const pointA = webMercatorUtils.xyToLngLat(coodinatesA[0], coodinatesA[1]);
+        const pointB = webMercatorUtils.xyToLngLat(coordinatesB[0], coordinatesB[1]);
 
-        // build graphic    
-        var polylineGraphic = new Graphic({
+        const polylineGraphic = new Graphic({
             geometry: {
                 type: "polyline", // autocasts as new Polyline()
                 paths: [
@@ -122,8 +127,6 @@ require([
             symbol: null
         });
 
-
-        // return the length
         return Math.round(geometryEngine.geodesicLength(polylineGraphic.geometry, "meters"));
     }
 })
