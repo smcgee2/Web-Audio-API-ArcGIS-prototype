@@ -14,7 +14,6 @@ require([
 
 ], function(FeatureLayer, SceneView, WebScene, Graphic, webMercatorUtils, geometryEngine, audioUtils, getSoundNodes) {
     // Example format for audio code
-    // TODO: This should be a point FeatureService!
 
     let arrayOfAudioNodes = [{
         coordinate: [1493174.243544884, 6893700.514951046],
