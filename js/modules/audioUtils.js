@@ -25,6 +25,7 @@ define([
          * @param {*} sound This is a sound created using createAudio function below.
          */
         function ThreeDAudio(cameraPosition, audioNodePosition, sound) {
+            unmuteClip(sound);
             const localReprojection = rotate(0, 0, (audioNodePosition[0] - cameraPosition.position.x) / 10, (audioNodePosition[1] - cameraPosition.position.y) / 10, 360 - cameraPosition.heading)
             sound.orientation(cameraPosition.position.x, cameraPosition.position.y, 0);
             sound.pos(localReprojection[0], localReprojection[1], 0);
@@ -35,6 +36,7 @@ define([
                 src: [source],
                 autoplay: true,
                 loop: true,
+                volume: 0,
                 plannerAttr: {
                     panningModel: 'HRTF'
                 }
@@ -43,17 +45,27 @@ define([
 
         function updateSoundVolume(distanceInMeters, maxDist, sound) {
             if (distanceInMeters > maxDist) {
-                sound.volume(0);
+                muteClip(sound);
             } else {
                 sound.volume((maxDist - distanceInMeters) / maxDist);
             }
+        }
+
+        function muteClip(sound) {
+            sound.volume(0);
+        }
+
+        function unmuteClip(sound) {
+            sound.volume(1);
         }
 
         //Stuff to make public
         return {
             ThreeDAudio: ThreeDAudio,
             createAudio: createAudio,
-            updateSoundVolume: updateSoundVolume
+            updateSoundVolume: updateSoundVolume,
+            muteClip: muteClip,
+            unmuteClip: unmuteClip
         };
 
     })

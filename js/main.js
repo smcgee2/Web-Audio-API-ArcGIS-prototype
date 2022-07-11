@@ -1,56 +1,81 @@
 require([
     // esri requires
-    "esri/Graphic",
     "esri/layers/FeatureLayer",
     "esri/views/SceneView",
     "esri/WebScene",
+
+    "esri/Graphic",
     "esri/geometry/support/webMercatorUtils",
     "esri/geometry/geometryEngine",
 
     // custom module
-    "./js/modules/audioUtils.js"
+    "./js/modules/audioUtils.js",
+    "./js/modules/getSoundNodes.js"
 
-], function(Graphic, FeatureLayer, SceneView, WebScene, webMercatorUtils, geometryEngine, audioUtils) {
-
+], function(FeatureLayer, SceneView, WebScene, Graphic, webMercatorUtils, geometryEngine, audioUtils, getSoundNodes) {
     // Example format for audio code
     // TODO: This should be a point FeatureService!
+
     let arrayOfAudioNodes = [{
-            coordinate: [1494250.8687, 6893332.5887],
-            audio: audioUtils.createAudio('audio/crane.wav'),
-            distance: 100
-        },
-        {
-            coordinate: [1493174.243544884, 6893700.514951046],
-            audio: audioUtils.createAudio('audio/boatEngine.wav'),
-            distance: 75
-        },
+        coordinate: [1493174.243544884, 6893700.514951046],
+        audio: audioUtils.createAudio('audio/boatEngine.wav'),
+    }];
 
-        {
-            coordinate: [1493107.604696026, 6893709.391938755],
-            audio: audioUtils.createAudio('audio/water.wav'),
-            distance: 500
-        },
-        {
-            coordinate: [1493920.2807606554, 6893570.898283289],
-            audio: audioUtils.createAudio('audio/water.wav'),
-            distance: 500
-        },
+    getSoundNodes.getData().then(function(results) {
 
-        {
-            coordinate: [1493325.5917520842, 6893439.523885197],
-            audio: audioUtils.createAudio('audio/birds.wav'),
-            distance: 500
-        },
-        {
-            coordinate: [1493195.966101118, 6894130.348681002],
-            audio: audioUtils.createAudio('audio/birds.wav'),
-            distance: 500
-        }, {
-            coordinate: [1492951.6263078996, 6894975.189566879],
-            audio: audioUtils.createAudio('audio/tramStation.wav'),
-            distance: 400
-        },
-    ]
+        // Yes, there's a nicer way of doing below.
+        // Future Sean - please refactor this.
+        for (i = 0; i < results.birds.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.birds.coordinates[i],
+                audio: audioUtils.createAudio('audio/birds.wav')
+            })
+        }
+
+        for (i = 0; i < results.water.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.water.coordinates[i],
+                audio: audioUtils.createAudio('audio/water.wav')
+            })
+        }
+
+        for (i = 0; i < results.train.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.train.coordinates[i],
+                audio: audioUtils.createAudio('audio/tramStation.wav')
+            })
+        }
+
+        for (i = 0; i < results.road.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.road.coordinates[i],
+                audio: audioUtils.createAudio('audio/road.wav')
+            })
+        }
+
+        audioNodesLoaded = true
+    });
+
+    function getDistance(coodinatesA, coordinatesB) {
+        // convert from xy to longlay
+        var pointA = webMercatorUtils.xyToLngLat(coodinatesA[0], coodinatesA[1]);
+        var pointB = webMercatorUtils.xyToLngLat(coordinatesB[0], coordinatesB[1]);
+
+        // build graphic    
+        var polylineGraphic = new Graphic({
+            geometry: {
+                type: "polyline", // autocasts as new Polyline()
+                paths: [
+                    [pointA[0], pointA[1], 700],
+                    [pointB[0], pointB[1], 700],
+                ]
+            },
+            symbol: null
+        });
+
+        // return the length
+        return Math.round(geometryEngine.geodesicLength(polylineGraphic.geometry, "meters"));
+    }
 
     // Adding buildings + initiating view.
     let view = new SceneView({
@@ -91,42 +116,26 @@ require([
     // when view is created
     view.when(function() {
         view.environment.lighting.waterReflectionEnabled = true;
-        cameraFOV = view.camera.fov // should be 55 - added this incase mobile/rotated device
 
-        view.watch("camera", function(value) {
+        view.watch("camera", function(cameraNode) {
             arrayOfAudioNodes.forEach(function(soundNode) {
-                // const distanceFromCamera = getDistance([value.position.x, value.position.y, value.position.z], soundNode.coordinate)
-                // const loudNess = soundNode.distance // distance can be heard from object in meters
-
-                // Distance based volume control
-                //audioUtils.updateSoundVolume(distanceFromCamera, loudNess, soundNode.audio);
+                const distanceFromCamera = getDistance([cameraNode.position.x, cameraNode.position.y, cameraNode.position.z], soundNode.coordinate)
 
                 // 3D spatial audio control
-                audioUtils.ThreeDAudio(value, soundNode.coordinate, soundNode.audio)
+                if (distanceFromCamera < 200) {
+                    audioUtils.ThreeDAudio(cameraNode, soundNode.coordinate, soundNode.audio)
+                } else {
+                    audioUtils.muteClip(soundNode.audio)
+                }
             });
         });
+
+        // Click to slowly zoom to...
+        view.on("click", function(e) {
+            view.goTo(e.mapPoint, {
+                duration: 10000,
+                maxDuration: 10000
+            })
+        })
     });
-
-    /**
-     * @param {array} coodinatesA Array of coordinates to start input distance form. This the camera in this case.
-     * @param {array} coordinatesB Array of coordinates to end the measurement from. In this case it's the coordinate of the audio node.
-     * @returns rounded distance between both coordinates in meters.
-     */
-    function getDistance(coodinatesA, coordinatesB) {
-        const pointA = webMercatorUtils.xyToLngLat(coodinatesA[0], coodinatesA[1]);
-        const pointB = webMercatorUtils.xyToLngLat(coordinatesB[0], coordinatesB[1]);
-
-        const polylineGraphic = new Graphic({
-            geometry: {
-                type: "polyline", // autocasts as new Polyline()
-                paths: [
-                    [pointA[0], pointA[1], 700],
-                    [pointB[0], pointB[1], 700],
-                ]
-            },
-            symbol: null
-        });
-
-        return Math.round(geometryEngine.geodesicLength(polylineGraphic.geometry, "meters"));
-    }
 })
