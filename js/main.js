@@ -17,7 +17,7 @@ require([
 
     let arrayOfAudioNodes = [{
         coordinate: [1493174.243544884, 6893700.514951046],
-        audio: audioUtils.createAudio('audio/boatEngine.wav'),
+        audio: audioUtils.createAudio('audio/boatEngine.mp3'),
     }];
 
     getSoundNodes.getData().then(function(results) {
@@ -27,28 +27,28 @@ require([
         for (i = 0; i < results.birds.coordinates.length; i++) {
             arrayOfAudioNodes.push({
                 coordinate: results.birds.coordinates[i],
-                audio: audioUtils.createAudio('audio/birds.wav')
+                audio: audioUtils.createAudio('audio/birds.mp3')
             })
         }
 
         for (i = 0; i < results.water.coordinates.length; i++) {
             arrayOfAudioNodes.push({
                 coordinate: results.water.coordinates[i],
-                audio: audioUtils.createAudio('audio/water.wav')
+                audio: audioUtils.createAudio('audio/water.mp3')
             })
         }
 
         for (i = 0; i < results.train.coordinates.length; i++) {
             arrayOfAudioNodes.push({
                 coordinate: results.train.coordinates[i],
-                audio: audioUtils.createAudio('audio/tramStation.wav')
+                audio: audioUtils.createAudio('audio/tramStation.mp3')
             })
         }
 
         for (i = 0; i < results.road.coordinates.length; i++) {
             arrayOfAudioNodes.push({
                 coordinate: results.road.coordinates[i],
-                audio: audioUtils.createAudio('audio/road.wav')
+                audio: audioUtils.createAudio('audio/road.mp3')
             })
         }
 
