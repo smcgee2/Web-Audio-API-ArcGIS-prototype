@@ -13,6 +13,47 @@ require([
     "./js/modules/getSoundNodes.js"
 
 ], function(FeatureLayer, SceneView, WebScene, Graphic, webMercatorUtils, geometryEngine, audioUtils, getSoundNodes) {
+    // Example format for audio code
+
+    let arrayOfAudioNodes = [{
+        coordinate: [1493174.243544884, 6893700.514951046],
+        audio: audioUtils.createAudio('audio/boatEngine.mp3'),
+    }];
+
+    getSoundNodes.getData().then(function(results) {
+
+        // Yes, there's a nicer way of doing below.
+        // Future Sean - please refactor this.
+        for (i = 0; i < results.birds.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.birds.coordinates[i],
+                audio: audioUtils.createAudio('audio/birds.mp3')
+            })
+        }
+
+        for (i = 0; i < results.water.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.water.coordinates[i],
+                audio: audioUtils.createAudio('audio/water.mp3')
+            })
+        }
+
+        for (i = 0; i < results.train.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.train.coordinates[i],
+                audio: audioUtils.createAudio('audio/tramStation.mp3')
+            })
+        }
+
+        for (i = 0; i < results.road.coordinates.length; i++) {
+            arrayOfAudioNodes.push({
+                coordinate: results.road.coordinates[i],
+                audio: audioUtils.createAudio('audio/road.mp3')
+            })
+        }
+
+        audioNodesLoaded = true
+    });
 
     function getDistance(coodinatesA, coordinatesB) {
         // convert from xy to longlay
@@ -75,7 +116,18 @@ require([
     view.when(function() {
         view.environment.lighting.waterReflectionEnabled = true;
 
+        view.watch("camera", function(cameraNode) {
+            arrayOfAudioNodes.forEach(function(soundNode) {
+                const distanceFromCamera = getDistance([cameraNode.position.x, cameraNode.position.y, cameraNode.position.z], soundNode.coordinate)
 
+                // 3D spatial audio control
+                if (distanceFromCamera < 200) {
+                    audioUtils.ThreeDAudio(cameraNode, soundNode.coordinate, soundNode.audio)
+                } else {
+                    audioUtils.muteClip(soundNode.audio)
+                }
+            });
+        });
 
         // Click to slowly zoom to...
         view.on("click", function(e) {
@@ -83,73 +135,6 @@ require([
                 duration: 10000,
                 maxDuration: 10000
             })
-
-            listForCameraChanges();
-
         })
     });
-
-    let isListening = false;
-
-    function listForCameraChanges() {
-        if (!isListening) {
-
-            // Example format for audio code
-
-            let arrayOfAudioNodes = [{
-                coordinate: [1493174.243544884, 6893700.514951046],
-                audio: audioUtils.createAudio('audio/boatEngine.mp3'),
-            }];
-
-            getSoundNodes.getData().then(function(results) {
-
-                // Yes, there's a nicer way of doing below.
-                // Future Sean - please refactor this.
-                for (i = 0; i < results.birds.coordinates.length; i++) {
-                    arrayOfAudioNodes.push({
-                        coordinate: results.birds.coordinates[i],
-                        audio: audioUtils.createAudio('audio/birds.mp3')
-                    })
-                }
-
-                for (i = 0; i < results.water.coordinates.length; i++) {
-                    arrayOfAudioNodes.push({
-                        coordinate: results.water.coordinates[i],
-                        audio: audioUtils.createAudio('audio/water.mp3')
-                    })
-                }
-
-                for (i = 0; i < results.train.coordinates.length; i++) {
-                    arrayOfAudioNodes.push({
-                        coordinate: results.train.coordinates[i],
-                        audio: audioUtils.createAudio('audio/tramStation.mp3')
-                    })
-                }
-
-                for (i = 0; i < results.road.coordinates.length; i++) {
-                    arrayOfAudioNodes.push({
-                        coordinate: results.road.coordinates[i],
-                        audio: audioUtils.createAudio('audio/road.mp3')
-                    })
-                }
-
-                audioNodesLoaded = true
-            });
-
-            view.watch("camera", function(cameraNode) {
-                arrayOfAudioNodes.forEach(function(soundNode) {
-                    const distanceFromCamera = getDistance([cameraNode.position.x, cameraNode.position.y, cameraNode.position.z], soundNode.coordinate)
-
-                    // 3D spatial audio control
-                    if (distanceFromCamera < 200) {
-                        audioUtils.ThreeDAudio(cameraNode, soundNode.coordinate, soundNode.audio)
-                    } else {
-                        audioUtils.muteClip(soundNode.audio)
-                    }
-                });
-            });
-            isListening = true;
-        }
-    }
-
 })
