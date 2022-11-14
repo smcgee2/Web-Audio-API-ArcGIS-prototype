@@ -3,7 +3,7 @@ define([
     "esri/Graphic",
 
     // external require (howler.js)
-    "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.js"
+    "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.2/howler.js"
 ],
     function (geometryEngine, Graphic, howler) {
         const soundResolution = 10; // meters

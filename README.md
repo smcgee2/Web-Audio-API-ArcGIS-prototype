@@ -4,7 +4,20 @@ Exploring creating 3D audio with a 3D map (WIP)
 The idea for this application is to showcase 3D audio in 3D space. The ArcGIS platform has a lot of data that we can help harness to hopefully make the process of adding in audio clips easier. 
 
 Stage 1.
-Showcase it working with a small prototype with 1 or 2 prebaked audio clips.
+Demo of a sample AudioLayer module.
+Audio files hosted alongside the app.
+
+let sampleAudioLayer = new AudioLayer.create({
+    geojson: geojson, (array of polyline features)
+    distance: 200, (in meters before sound plays)
+    supportStereoAudio: true, (not implemented)
+    movingObjects: [], (not implemented)
+    camera: view.camera (trigger this on camera change)
+});
+
+view.watch("camera", function (cameraObject) {
+    sampleAudioLayer.camera(cameraObject);
+});
 
 Stage 2.
 Automate with another external API to get sound effects.
