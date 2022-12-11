@@ -1,11 +1,11 @@
 define([
-    "esri/geometry/geometryEngine",
-    "esri/Graphic",
+        // external require (howler.js)
+        "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.2/howler.js",
 
-    // external require (howler.js)
-    "https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.2/howler.js"
-],
-    function (geometryEngine, Graphic, howler) {
+        // adding turf.js for geometry functions
+        "https://unpkg.com/@turf/turf@6/turf.min.js"
+    ],
+    function(howler, turf) {
         const soundResolution = 10; // meters
 
         /**
@@ -58,24 +58,17 @@ define([
          * @returns array of points
          */
         function splitPolylineIntoPoints(polylinePath, name) {
-            const polylineGraphic = new Graphic({
-                geometry: {
-                    type: "polyline", // autocasts as new Polyline()
-                    paths: polylinePath,
-                    spatialReference: {
-                        "wkid": 102100
-                    }
-                },
-                symbol: null
-            });
-
-            const newLine = geometryEngine.densify(polylineGraphic.geometry, soundResolution, "meters");
-            const newLinePaths = newLine.paths[0];
+            const line = turf.lineString(polylinePath[0]);
+            const chunk = turf.lineChunk(line, soundResolution * 30, { units: 'meters' });
+            const newLinePaths = chunk.features;
 
             let finalArray = [];
 
             for (ii = 0; ii < newLinePaths.length; ii++) {
-                finalArray.push(newLinePaths[ii]);
+                finalArray.push(
+                    newLinePaths[ii].geometry.coordinates[0],
+                    newLinePaths[ii].geometry.coordinates[newLinePaths[ii].geometry.coordinates.length - 1]
+                );
 
                 if (ii === newLinePaths.length - 1) {
                     return {
@@ -86,42 +79,14 @@ define([
             };
         }
 
-        /**
-         * If a given point falls within a given polygon
-         * This is used to see if the camera is within the polygon.
-         * @param {*} point 
-         * @param {*} polygon 
-         * @returns boolean
-         */
-        function pointFallsWithinPolygon(point, polygon) {
-
-        }
-
-        /**
-         * Split polygon into a polyline 
-         * @param {*} polygon 
-         * @returns polyline 
-         */
-        function splitPolygonIntoPolyline(polygon) {
-
-        }
-
-
         function getDistance(coodinatesA, coordinatesB) {
-            // build graphic    
-            const polylineGraphic = new Graphic({
-                geometry: {
-                    type: "polyline", // autocasts as new Polyline()
-                    paths: [
-                        [coodinatesA[0], coodinatesA[1], 700],
-                        [coordinatesB[0], coordinatesB[1], 700],
-                    ]
-                },
-                symbol: null
-            });
+            const line = turf.lineString([
+                [coodinatesA[0], coodinatesA[1]],
+                [coordinatesB[0], coordinatesB[1]],
+            ]);
 
             // return the length
-            return Math.round(geometryEngine.geodesicLength(polylineGraphic.geometry, "meters"));
+            return Math.round(turf.length(line, { units: "meters" }));
         }
 
 
@@ -166,12 +131,12 @@ define([
 
         // HOWLER JS RELATED FUNCTIONS
         /**
-          * Note: We're currently not using Z axis here at the moment.
-          * 
-          * @param {*} cameraPosition camera coords
-          * @param {*} audioNodePosition point coords
-          * @param {*} sound This is a sound created using createAudio function below.
-          */
+         * Note: We're currently not using Z axis here at the moment.
+         * 
+         * @param {*} cameraPosition camera coords
+         * @param {*} audioNodePosition point coords
+         * @param {*} sound This is a sound created using createAudio function below.
+         */
         function ThreeDAudio(localReprojection, cameraCoords, sound) {
             unmuteClip(sound);
             sound.orientation(cameraCoords[0], cameraCoords[1], 0);
